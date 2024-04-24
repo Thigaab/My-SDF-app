@@ -3,18 +3,23 @@ package com.example.mysdfapp;
 
 import android.util.Log;
 
+import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FieldValue;
 import com.google.firebase.firestore.FirebaseFirestore;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import android.util.Log;
-
+import com.google.android.gms.tasks.OnFailureListener;
 import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.GeoPoint;
+import com.google.firebase.firestore.Query;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 
 import java.util.HashMap;
@@ -33,10 +38,11 @@ public class DatabaseManager {
         annoncesCollection = db.collection("annonces");
     }
 
-    public void ajouterAnnonce(GeoPoint point ,String fin, String titre, String description, String photoUrl, String utilisateurId) {
+    public void ajouterAnnonce(String[] cathegorie, GeoPoint point ,String fin, String titre, String description, String photoUrl, String utilisateurId) {
         Map<String, Object> annonce = new HashMap<>();
         annonce.put("Titre", titre);
         annonce.put("Déscription", description);
+        annonce.put("Catégorie", cathegorie);
         annonce.put("Photo", photoUrl);
         annonce.put("Nombre de likes", 50);
         annonce.put("UserID", utilisateurId);
@@ -92,5 +98,33 @@ public class DatabaseManager {
                 .addOnFailureListener(e -> {
                     Log.w(TAG, "Erreur lors de la suppression de l'annonce", e);
                 });
+    }
+    public void mettreAJourCategories(String idAnnonce, String[] nouvellesCategories) {
+        DocumentReference annonceRef = annoncesCollection.document(idAnnonce);
+
+        annonceRef.update("categories", nouvellesCategories)
+                .addOnSuccessListener(aVoid -> {
+                    Log.d(TAG, "Catégories de l'annonce mises à jour avec succès");
+                })
+                .addOnFailureListener(e -> {
+                    Log.w(TAG, "Erreur lors de la mise à jour des catégories de l'annonce", e);
+                });
+    }
+    public void rechercherAnnoncesParCategorie(String categorie, OnSuccessListener<List<String>> onSuccessListener, OnFailureListener onFailureListener) {
+        // Créer une requête pour rechercher les annonces ayant la catégorie donnée
+        Query query = annoncesCollection.whereArrayContains("categories", categorie);
+
+        // Exécuter la requête
+        query.get()
+                .addOnSuccessListener(queryDocumentSnapshots -> {
+                    List<String> idsAnnonces = new ArrayList<>();
+                    for (QueryDocumentSnapshot document : queryDocumentSnapshots) {
+                        // Ajouter l'identifiant de l'annonce à la liste
+                        idsAnnonces.add(document.getId());
+                    }
+                    // Appeler onSuccessListener avec la liste des identifiants des annonces correspondantes
+                    onSuccessListener.onSuccess(idsAnnonces);
+                })
+                .addOnFailureListener(onFailureListener);
     }
 }
