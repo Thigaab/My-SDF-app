@@ -10,6 +10,8 @@ import androidx.fragment.app.Fragment;
 import androidx.navigation.fragment.NavHostFragment;
 
 import com.example.mysdfapp.databinding.FragmentFirstBinding;
+import com.google.firebase.Firebase;
+import com.google.firebase.auth.FirebaseUser;
 
 public class FirstFragment extends Fragment {
 
