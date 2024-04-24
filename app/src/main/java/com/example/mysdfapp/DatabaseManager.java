@@ -9,7 +9,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class DatabaseManager {
-
+/*
     private static final String TAG = "DatabaseManager";
 
     private FirebaseFirestore db;
@@ -54,5 +54,5 @@ public class DatabaseManager {
                 });
     }
 
-    // Ajouter d'autres méthodes pour ajouter, supprimer des likes, etc.
+    // Ajouter d'autres méthodes pour ajouter, supprimer des likes, etc.*/
 }
