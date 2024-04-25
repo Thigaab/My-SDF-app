@@ -43,4 +43,7 @@
         libero vel nunc consequat, quis tincidunt nisl eleifend. Cras bibendum enim a justo luctus
         vestibulum. Fusce dictum libero quis erat maximus, vitae volutpat diam dignissim.
     </string>
+    <string name="delete_label">Delete</string>
+    <string name="upvote_button_contentDescription">Up vote</string>
+    <string name="downvote_button_contentDescription">Down vote</string>
 </resources>
