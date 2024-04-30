@@ -135,5 +135,4 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback {
             myMap.clear();
         }
     }
-
 }
