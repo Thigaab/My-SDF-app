@@ -46,4 +46,5 @@
     <string name="delete_label">Delete</string>
     <string name="upvote_button_contentDescription">Up vote</string>
     <string name="downvote_button_contentDescription">Down vote</string>
+    <string name="loadMore_button_contentDescription">Load more posts</string>
 </resources>
