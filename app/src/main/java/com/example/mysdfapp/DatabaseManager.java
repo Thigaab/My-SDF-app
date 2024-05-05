@@ -31,113 +31,105 @@ public class DatabaseManager {
     private static final String TAG = "DatabaseManager";
 
     private FirebaseFirestore db;
-    private CollectionReference annoncesCollection;
+    private CollectionReference announcementsCollection;
     private CollectionReference likesCollection;
 
     public DatabaseManager() {
         db = FirebaseFirestore.getInstance();
-        annoncesCollection = db.collection("annonces");
+        announcementsCollection = db.collection("announcements");
     }
 
+    public void addAnnouncement(String[] category, GeoPoint point, Timestamp end, String title, String description, String photoUrl, String userId) {
+        Map<String, Object> announcement = new HashMap<>();
+        announcement.put("Title", title);
+        announcement.put("Description", description);
+        announcement.put("Category", category);
+        announcement.put("Photo", photoUrl);
+        announcement.put("Number_of_likes", 50);
+        announcement.put("UserID", userId);
+        announcement.put("Creation", Timestamp.now());
+        announcement.put("End", end);
+        announcement.put("Coordinates", point);
 
-
-    public void ajouterAnnonce(String[] cathegorie, GeoPoint point , Timestamp fin, String titre, String description, String photoUrl, String utilisateurId) {
-        Map<String, Object> annonce = new HashMap<>();
-        annonce.put("Titre", titre);
-        annonce.put("Déscription", description);
-        annonce.put("Catégorie", cathegorie);
-        annonce.put("Photo", photoUrl);
-        annonce.put("Nombre de likes", 50);
-        annonce.put("UserID", utilisateurId);
-        annonce.put("Création", Timestamp.now());
-        annonce.put("Fin",fin);
-        annonce.put("Coordonnée", point);
-
-        annoncesCollection.add(annonce)
+        announcementsCollection.add(announcement)
                 .addOnSuccessListener(documentReference -> {
-                    Log.d(TAG, "Annonce ajoutée avec ID : " + documentReference.getId());
+                    Log.d(TAG, "Announcement added with ID: " + documentReference.getId());
                 })
                 .addOnFailureListener(e -> {
-                    Log.w(TAG, "Erreur lors de l'ajout de l'annonce", e);
+                    Log.w(TAG, "Error adding announcement", e);
                 });
     }
 
-    public void recupererAnnonces() {
-        annoncesCollection.get()
+    public void retrieveAnnouncements() {
+        announcementsCollection.get()
                 .addOnSuccessListener(queryDocumentSnapshots -> {
                     for (QueryDocumentSnapshot document : queryDocumentSnapshots) {
-                        // Traitement des annonces récupérées
-                        // Vous pouvez par exemple les afficher dans l'interface utilisateur
+                        // Processing retrieved announcements
+                        // You can, for example, display them in the user interface
                     }
                 })
                 .addOnFailureListener(e -> {
-                    Log.w(TAG, "Erreur lors de la récupération des annonces", e);
+                    Log.w(TAG, "Error retrieving announcements", e);
                 });
     }
 
-    public void augmenterLikesAnnonce(String idAnnonce) {
-        // Référence au document de l'annonce dans la collection "annonces"
-        DocumentReference annonceRef = annoncesCollection.document(idAnnonce);
+    public void increaseLikesAnnouncement(String announcementId) {
+        DocumentReference announcementRef = announcementsCollection.document(announcementId);
 
-        // Mettre à jour le nombre de likes en incrémentant la valeur actuelle de 1
-        annonceRef.update("likes", FieldValue.increment(1))
+        announcementRef.update("Number_of_likes", FieldValue.increment(1))
                 .addOnSuccessListener(aVoid -> {
-                    Log.d(TAG, "Nombre de likes de l'annonce augmenté avec succès");
+                    Log.d(TAG, "Number_of_likes of announcement increased successfully");
                 })
                 .addOnFailureListener(e -> {
-                    Log.w(TAG, "Erreur lors de l'augmentation du nombre de likes de l'annonce", e);
+                    Log.w(TAG, "Error increasing Number_of_likes of announcement", e);
                 });
     }
 
-    public void supprimerAnnonce(String idAnnonce) {
-        // Référence au document de l'annonce dans la collection "annonces"
-        DocumentReference annonceRef = annoncesCollection.document(idAnnonce);
+    public void deleteAnnouncement(String announcementId) {
+        DocumentReference announcementRef = announcementsCollection.document(announcementId);
 
-        // Supprimer le document de l'annonce
-        annonceRef.delete()
+        announcementRef.delete()
                 .addOnSuccessListener(aVoid -> {
-                    Log.d(TAG, "Annonce supprimée avec succès");
+                    Log.d(TAG, "Announcement deleted successfully");
                 })
                 .addOnFailureListener(e -> {
-                    Log.w(TAG, "Erreur lors de la suppression de l'annonce", e);
+                    Log.w(TAG, "Error deleting announcement", e);
                 });
     }
-    public void mettreAJourCategories(String idAnnonce, String[] nouvellesCategories) {
-        DocumentReference annonceRef = annoncesCollection.document(idAnnonce);
 
-        annonceRef.update("categories", nouvellesCategories)
+    public void updateCategories(String announcementId, String[] newCategories) {
+        DocumentReference announcementRef = announcementsCollection.document(announcementId);
+
+        announcementRef.update("Category", newCategories)
                 .addOnSuccessListener(aVoid -> {
-                    Log.d(TAG, "Catégories de l'annonce mises à jour avec succès");
+                    Log.d(TAG, "Categories of announcement updated successfully");
                 })
                 .addOnFailureListener(e -> {
-                    Log.w(TAG, "Erreur lors de la mise à jour des catégories de l'annonce", e);
+                    Log.w(TAG, "Error updating Categories of announcement", e);
                 });
     }
-    public void rechercherAnnoncesParCategorie(String categorie, OnSuccessListener<List<Annonce>> onSuccessListener, OnFailureListener onFailureListener) {
-        // Créer une requête pour rechercher les annonces ayant la catégorie donnée
-        Query query = annoncesCollection.whereArrayContains("categories", categorie);
 
-        // Exécuter la requête
+    public void searchAnnouncementsByCategory(String category, OnSuccessListener<List<Announcement>> onSuccessListener, OnFailureListener onFailureListener) {
+        Query query = announcementsCollection.whereArrayContains("Category", category);
+
         query.get()
                 .addOnSuccessListener(queryDocumentSnapshots -> {
-                    List<Annonce> idsAnnonces = new ArrayList<>();
+                    List<Announcement> idsAnnouncements = new ArrayList<>();
                     for (QueryDocumentSnapshot document : queryDocumentSnapshots) {
-                        // Ajouter l'identifiant de l'annonce à la liste
-                        Annonce newannonce = new Annonce();
-                        newannonce.ID  = document.getId();
-                        newannonce.Titre = document.getString("Titre");
-                        newannonce.Déscription = document.getString("Déscription");
-                        newannonce.Catégorie = (List<String>) document.get("Catégorie");
-                        newannonce.Photo = document.getString("Photo");
-                        newannonce.Nombre_de_likes = document.getLong("Nombre de likes");
-                        newannonce.UserID = document.getString("UserID");
-                        newannonce.Création = document.getTimestamp("Création");
-                        newannonce.Fin = document.getTimestamp("Fin");
-                        newannonce.Coordonnée = document.getGeoPoint("Coordonnée");
-                        idsAnnonces.add(newannonce);
+                        Announcement newAnnouncement = new Announcement();
+                        newAnnouncement.ID = document.getId();
+                        newAnnouncement.Title = document.getString("Title");
+                        newAnnouncement.Description = document.getString("Description");
+                        newAnnouncement.Category = (List<String>) document.get("Category");
+                        newAnnouncement.Photo = document.getString("Photo");
+                        newAnnouncement.Number_of_likes = document.getLong("Number_of_likes");
+                        newAnnouncement.UserID = document.getString("UserID");
+                        newAnnouncement.Creation = document.getTimestamp("Creation");
+                        newAnnouncement.End = document.getTimestamp("End");
+                        newAnnouncement.Coordinates = document.getGeoPoint("Coordinates");
+                        idsAnnouncements.add(newAnnouncement);
                     }
-                    // Appeler onSuccessListener avec la liste des identifiants des annonces correspondantes
-                    onSuccessListener.onSuccess(idsAnnonces);
+                    onSuccessListener.onSuccess(idsAnnouncements);
                 })
                 .addOnFailureListener(onFailureListener);
     }
