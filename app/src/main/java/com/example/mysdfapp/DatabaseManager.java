@@ -32,13 +32,45 @@ public class DatabaseManager {
 
     private FirebaseFirestore db;
     private CollectionReference announcementsCollection;
+    public CollectionReference categoryCollection;
     private CollectionReference likesCollection;
 
     public DatabaseManager() {
         db = FirebaseFirestore.getInstance();
         announcementsCollection = db.collection("announcements");
-    }
+        categoryCollection = db.collection("Category");
 
+    }
+    public void addCategory(String[] category) {
+        Map<String, Object> Category = new HashMap<>();
+        Category.put("Category_Champ", category);
+
+        categoryCollection.add(Category)
+                .addOnSuccessListener(documentReference -> {
+                    Log.d(TAG, "Announcement added with ID: " + documentReference.getId());
+                })
+                .addOnFailureListener(e -> {
+                    Log.w(TAG, "Error adding announcement", e);
+                });
+    }
+    public List<String> retrieveCategory() {
+        List<String> categoryChamps = new ArrayList<>();
+        categoryCollection.get()
+                .addOnSuccessListener(queryDocumentSnapshots -> {
+
+                    for (QueryDocumentSnapshot document : queryDocumentSnapshots) {
+                        String categoryChamp = document.getString("Category_Champ");
+                        if (categoryChamp != null) {
+                            categoryChamps.add(categoryChamp);
+                        }
+                    }
+                })
+                .addOnFailureListener(e -> {
+                    Log.w(TAG, "Error retrieving categories", e);
+                });
+        return categoryChamps;
+
+    }
     public void addAnnouncement(String[] category, GeoPoint point, Timestamp end, String title, String description, String photoUrl, String userId) {
         Map<String, Object> announcement = new HashMap<>();
         announcement.put("Title", title);
