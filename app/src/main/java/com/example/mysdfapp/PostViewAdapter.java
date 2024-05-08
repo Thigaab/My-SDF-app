@@ -11,15 +11,22 @@ public class PostViewAdapter extends RecyclerView.Adapter<PostViewAdapter.ViewHo
 
     // Variable for post list
 
-    public PostViewAdapter(){
+    public PostViewAdapter(OnItemClickListener clickListener){
         //Initialize things
+        ClickListener = clickListener;
     }
+
+    public interface OnItemClickListener {
+        void onItemClick(View view, int position);
+    }
+
+    public OnItemClickListener ClickListener;
 
     @NonNull
     @Override
     public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         View itemView = LayoutInflater.from(parent.getContext()).inflate(R.layout.post_layout, parent, false);
-        return new ViewHolder(itemView);
+        return new ViewHolder(itemView, ClickListener);
     }
 
     @Override
@@ -52,16 +59,30 @@ public class PostViewAdapter extends RecyclerView.Adapter<PostViewAdapter.ViewHo
     }
 
     public static class ViewHolder extends RecyclerView.ViewHolder{
+        public OnItemClickListener ClickListener;
         public TextView PostTitle;
         public ImageButton UpVoteButton;
         public ImageButton DownVoteButton;
         public TextView LikeNumber;
-        public ViewHolder(View itemView){
+        public ViewHolder(View itemView, OnItemClickListener clickListener){
             super(itemView);
             PostTitle = itemView.findViewById(R.id.post_title);
             UpVoteButton = itemView.findViewById(R.id.post_upvoteButton);
             DownVoteButton = itemView.findViewById(R.id.post_downvoteButton);
             LikeNumber = itemView.findViewById(R.id.post_likeNumber);
+            ClickListener = clickListener;
+
+            itemView.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    if (ClickListener != null){
+                        int position = getAdapterPosition();
+                        if (position != RecyclerView.NO_POSITION){
+                            ClickListener.onItemClick(v,position);
+                        }
+                    }
+                }
+            });
         }
     }
 }

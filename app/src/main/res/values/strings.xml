@@ -47,4 +47,15 @@
     <string name="upvote_button_contentDescription">Up vote</string>
     <string name="downvote_button_contentDescription">Down vote</string>
     <string name="loadMore_button_contentDescription">Load more posts</string>
+    <string name="mypost_button_contentDescription">Go to my posts</string>
+    <string name="post_researchBar_label">Current sorting method: </string>
+    <string name="researchOption_popular">Most popular</string>
+    <string name="researchOption_nearest">Nearest</string>
+    <string name="researchOption_keywords">With keywords</string>
+    <string name="details_titleLabel">Title</string>
+    <string name="details_descriptionLabel">Description</string>
+    <string name="details_numberOfLikeLabel">Number of like</string>
+    <string name="newPost_titlePrompt">Insert title here</string>
+    <string name="newPost_descriptionPrompt">Insert description here</string>
+    <string name="geo_button_label">See location on the map</string>
 </resources>
