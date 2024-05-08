@@ -71,6 +71,7 @@ public class DatabaseManager {
         return categoryChamps;
 
     }
+
     public void addAnnouncement(String[] category, GeoPoint point, Timestamp end, String title, String description, String photoUrl, String userId) {
         Map<String, Object> announcement = new HashMap<>();
         announcement.put("Title", title);
@@ -140,7 +141,6 @@ public class DatabaseManager {
                     Log.w(TAG, "Error updating Categories of announcement", e);
                 });
     }
-
     public void searchAnnouncementsByCategory(String category, OnSuccessListener<List<Announcement>> onSuccessListener, OnFailureListener onFailureListener) {
         Query query = announcementsCollection.whereArrayContains("Category", category);
 
