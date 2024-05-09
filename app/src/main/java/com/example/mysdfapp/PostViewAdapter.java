@@ -7,9 +7,13 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
+import java.util.List;
+
 public class PostViewAdapter extends RecyclerView.Adapter<PostViewAdapter.ViewHolder> {
 
     // Variable for post list
+    public List<Announcement> AnnouncementList;
+    public DatabaseManager DatabaseManager;
 
     public PostViewAdapter(OnItemClickListener clickListener){
         //Initialize things
@@ -32,8 +36,8 @@ public class PostViewAdapter extends RecyclerView.Adapter<PostViewAdapter.ViewHo
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
         // Gets the data from the post at the position
-        String title = "Title";
-        String likeNumber = "Number";
+        String title = AnnouncementList.get(position).Title;
+        String likeNumber = AnnouncementList.get(position).Number_of_likes.toString();
 
         // Update the view holder with the information found at the position
         holder.PostTitle.setText(title);
@@ -42,12 +46,14 @@ public class PostViewAdapter extends RecyclerView.Adapter<PostViewAdapter.ViewHo
             @Override
             public void onClick(View v) {
                 // Add upvote to the post at the position
+                DatabaseManager.LikesAnnouncement(AnnouncementList.get(holder.getPosition()).ID, 1);
             }
         });
         holder.DownVoteButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 // Add downvote to the post at the position
+                DatabaseManager.LikesAnnouncement(AnnouncementList.get(holder.getPosition()).ID, -1);
             }
         });
     }
@@ -55,7 +61,7 @@ public class PostViewAdapter extends RecyclerView.Adapter<PostViewAdapter.ViewHo
     @Override
     public int getItemCount() {
         // Returns the size of the post list
-        return 0;
+        return AnnouncementList.size();
     }
 
     public static class ViewHolder extends RecyclerView.ViewHolder{

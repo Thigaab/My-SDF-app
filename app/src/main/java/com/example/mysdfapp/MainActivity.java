@@ -12,6 +12,9 @@ import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 
 import com.example.mysdfapp.databinding.ActivityMainBinding;
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
+import com.google.firebase.firestore.GeoPoint;
+import com.google.firebase.firestore.Query;
 
 import android.view.Menu;
 import android.view.MenuItem;
@@ -21,6 +24,7 @@ import android.widget.Spinner;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -31,15 +35,22 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private ResearchOption _currentOption = ResearchOption.POPULAR;
+    private String _currentCategory;
 
     private List<String> _researchOptionsLabels;
+    private List<String> _categories;
     private ActivityMainBinding _binding;
     private FragmentManager _fragmentManager;
+    private DatabaseManager _databaseManager;
+    public DatabaseManager getDatabaseManager(){
+        return _databaseManager;
+    }
 
     // Main layout ui component
     private Spinner _researchSpinner;
     private Spinner _keywordSpinner;
     private Toolbar _toolbar;
+    private FloatingActionButton _myspaceButton;
 
 
     @Override
@@ -49,12 +60,14 @@ public class MainActivity extends AppCompatActivity {
 
         _binding = ActivityMainBinding.inflate(getLayoutInflater());
         _fragmentManager = getSupportFragmentManager();
+        _databaseManager = new DatabaseManager();
 
         setContentView(_binding.getRoot());
 
         _researchSpinner = _binding.mainResearchSpinner;
         _keywordSpinner = _binding.mainKeywordSpinner;
         _toolbar = _binding.mainToolbar;
+        _myspaceButton = _binding.myspaceButton;
 
         setSupportActionBar(_toolbar);
 
@@ -78,19 +91,26 @@ public class MainActivity extends AppCompatActivity {
                         if (_currentOption == ResearchOption.KEYWORDS){
                             hideKeywordsOptions();
                         }
-                        _currentOption = ResearchOption.POPULAR;
+                        if (_currentOption != ResearchOption.POPULAR){
+                            _databaseManager.ResetLastDocument();
+                            _currentOption = ResearchOption.POPULAR;
+                        }
                         break;
                     case 1:
                         if (_currentOption == ResearchOption.KEYWORDS){
                             hideKeywordsOptions();
                         }
-                        _currentOption = ResearchOption.NEAREST;
+                        if (_currentOption != ResearchOption.NEAREST){
+                            _databaseManager.ResetLastDocument();
+                            _currentOption = ResearchOption.NEAREST;
+                        }
                         break;
                     case 2:
                         if (_currentOption != ResearchOption.KEYWORDS){
                             showKeywordsOptions();
+                            _databaseManager.ResetLastDocument();
+                            _currentOption = ResearchOption.KEYWORDS;
                         }
-                        _currentOption = ResearchOption.KEYWORDS;
                         break;
                 }
             }
@@ -98,6 +118,31 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onNothingSelected(AdapterView<?> parent) {
                 // Nothing
+            }
+        });
+
+        _categories = new ArrayList<>();
+        ArrayAdapter<String> categoryAdapter = new ArrayAdapter<>(this, androidx.appcompat.R.layout.support_simple_spinner_dropdown_item, _categories);
+        _keywordSpinner.setAdapter(categoryAdapter);
+
+
+        _databaseManager.retrieveCategory(new DatabaseManager.ExecuteAfterCategoryQuery() {
+            @Override
+            public void applyToCategories(List<String> categories) {
+                for (String category : categories){
+                    _categories.add(category);
+                }
+                categoryAdapter.notifyDataSetChanged();
+            }
+        });
+
+
+
+        _myspaceButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                MyPostListFragment newFragment = new MyPostListFragment();
+                commitFragment(newFragment, null);
             }
         });
     }
@@ -121,7 +166,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void setBackButtonEnabled(boolean enabled){
-        _toolbar.setBackInvokedCallbackEnabled(enabled);
+        getSupportActionBar().setDisplayHomeAsUpEnabled(enabled);
     }
 
     @Override
@@ -138,7 +183,17 @@ public class MainActivity extends AppCompatActivity {
         // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
 
-        // If we want to add buttons
+        if (id == android.R.id.home){
+            if (getSupportFragmentManager().getBackStackEntryCount() > 0) {
+                // S'il y a des fragments dans la pile de retour arrière, revenir au précédent
+                getSupportFragmentManager().popBackStack();
+            } else {
+                // Sinon, comportement par défaut (quitter l'activité)
+                onBackPressed();
+            }
+        }
+
+
 
         return super.onOptionsItemSelected(item);
     }
@@ -149,5 +204,20 @@ public class MainActivity extends AppCompatActivity {
 
     public void hideKeywordsOptions(){
         _keywordSpinner.setVisibility(View.GONE);
+    }
+
+    public void fetchInDatabase(DatabaseManager.ExecuteToListAfterQueryAction action){
+        switch (_currentOption){
+            case POPULAR:
+                _databaseManager.searchAnnouncementsOrderByLikes(action);
+                break;
+            case NEAREST:
+                GeoPoint localisation = null;
+                _databaseManager.searchAnnouncementsOrderByProximity(action, localisation);
+                break;
+            case KEYWORDS:
+                _databaseManager.searchAnnouncementsByCategory(_currentCategory, action);
+                break;
+        }
     }
 }

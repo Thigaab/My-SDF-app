@@ -10,11 +10,18 @@ import android.view.ViewGroup;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
+
+import java.util.ArrayList;
+import java.util.List;
+
 public class PostListFragment extends Fragment {
 
     private MainActivity _mainActivity;
+    private DatabaseManager _databaseManager;
     private RecyclerView _recyclerView;
     private PostViewAdapter _postAdapter;
+    private FloatingActionButton _loadButton;
 
     @Override
     public void onAttach(Context context){
@@ -22,6 +29,7 @@ public class PostListFragment extends Fragment {
         Log.i("PostListFragment","Fragment's on attach");
         if (context instanceof MainActivity){
             _mainActivity = (MainActivity) context;
+            _databaseManager = _mainActivity.getDatabaseManager();
         }
     }
 
@@ -29,6 +37,7 @@ public class PostListFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.post_list, container, false);
         _recyclerView = view.findViewById(R.id.post_list_recyclerView);
+        _loadButton = view.findViewById(R.id.post_list_loadMore);
 
         _postAdapter = new PostViewAdapter(new PostViewAdapter.OnItemClickListener() {
             @Override
@@ -36,8 +45,26 @@ public class PostListFragment extends Fragment {
                 // Expend fragment with the given post info
             }
         });
+        _postAdapter.AnnouncementList = new ArrayList<>();
+        _postAdapter.DatabaseManager = _databaseManager;
 
         _recyclerView.setAdapter(_postAdapter);
+
+        _loadButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                _mainActivity.fetchInDatabase(new DatabaseManager.ExecuteToListAfterQueryAction() {
+                    @Override
+                    public void applyToAnnouncements(List<Announcement> announcementList) {
+                        int startPosition = _postAdapter.getItemCount();
+                        for (Announcement announcement : announcementList){
+                            _postAdapter.AnnouncementList.add(announcement);
+                        }
+                        _postAdapter.notifyItemRangeInserted(startPosition, announcementList.size());
+                    }
+                });
+            }
+        });
 
         Log.i("PostListFragment","end of fragment's create view");
         _mainActivity.setToolbarTitle("Discover new discounts");

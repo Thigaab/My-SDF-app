@@ -3,18 +3,18 @@ package com.example.mysdfapp;
 
 import android.util.Log;
 
-import com.google.android.gms.tasks.OnSuccessListener;
+
 import com.google.firebase.Timestamp;
+import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FieldValue;
 import com.google.firebase.firestore.FirebaseFirestore;
 
 import java.util.ArrayList;
-import java.util.Collections;
+import java.util.Calendar;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import com.google.android.gms.tasks.OnFailureListener;
 import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.GeoPoint;
@@ -30,11 +30,13 @@ public class DatabaseManager {
     public CollectionReference categoryCollection;
     private CollectionReference updateCollection;
 
+    public long LimitPerBatch = 10;
+
     public DatabaseManager() {
         db = FirebaseFirestore.getInstance();
         announcementsCollection = db.collection("announcements");
         categoryCollection = db.collection("Category");
-        updateCollection = db.collection("uptdate");
+        updateCollection = db.collection("update");
     }
     public void Update() {
         // Get the reference of the document containing the last update
@@ -48,11 +50,13 @@ public class DatabaseManager {
                             // Get the current timestamp
                             Timestamp currentTimestamp = Timestamp.now();
 
-                            // Calculate the difference between the current timestamp and the timestamp of the last update
-                            long differenceInMillis = currentTimestamp.getSeconds() * 1000 - lastUpdateTimeStamp.getSeconds() * 1000;
+                            Calendar calendar = Calendar.getInstance();
+                            calendar.add(Calendar.DAY_OF_MONTH, - 1);
+                            java.util.Date yesterday = calendar.getTime();
+
 
                             // Check if the difference is greater than 24 hours (in milliseconds)
-                            if (differenceInMillis > 24 * 60 * 60 * 1000) {
+                            if (lastUpdateTimeStamp.toDate().before(yesterday)) {
                                 // Update the document with the new timestamp
                                 updatelike();
                                 lastUpdateDocRef.update("timestamp", currentTimestamp)
@@ -92,12 +96,12 @@ public class DatabaseManager {
                         if (endTimestamp != null && endTimestamp.toDate().before(Timestamp.now().toDate())) {
                             deleteAnnouncement(document.getId());
                         } else {
-                            // Increment the number of likes
-                            document.getReference().update("Number_of_likes", FieldValue.increment(1))
+                            // Decrement the number of likes
+                            document.getReference().update("Number_of_likes", FieldValue.increment(-1))
                                     .addOnSuccessListener(aVoid -> {
                                         // Check if the number of likes became zero after incrementing
                                         Long numberOfLikes = document.getLong("Number_of_likes");
-                                        if (numberOfLikes != null && numberOfLikes == 0) {
+                                        if (numberOfLikes != null && numberOfLikes <= 0) {
                                             deleteAnnouncement(document.getId());
                                         }
                                     })
@@ -112,7 +116,7 @@ public class DatabaseManager {
                 });
     }
 
-    public void addCategory(String[] category) {
+    public void addCategory(String category) {
         Map<String, Object> Category = new HashMap<>();
         Category.put("Category_Champ", category);
 
@@ -124,56 +128,48 @@ public class DatabaseManager {
                     Log.w(TAG, "Error adding announcement", e);
                 });
     }
-    public List<String> retrieveCategory() {
-        List<String> categoryChamps = new ArrayList<>();
+
+    public interface ExecuteAfterCategoryQuery{
+        void applyToCategories(List<String> categories);
+    }
+
+    public void retrieveCategory(ExecuteAfterCategoryQuery action) {
         categoryCollection.get()
                 .addOnSuccessListener(queryDocumentSnapshots -> {
-
+                    List<String> categories = new ArrayList<String>();
                     for (QueryDocumentSnapshot document : queryDocumentSnapshots) {
                         String categoryChamp = document.getString("Category_Champ");
                         if (categoryChamp != null) {
-                            categoryChamps.add(categoryChamp);
+                            categories.add(categoryChamp);
                         }
                     }
+
+                    action.applyToCategories(categories);
                 })
                 .addOnFailureListener(e -> {
                     Log.w(TAG, "Error retrieving categories", e);
                 });
-        return categoryChamps;
 
     }
 
-    public void addAnnouncement(String[] category, GeoPoint point, Timestamp end, String title, String description, String photoUrl, String userId) {
-        Map<String, Object> announcement = new HashMap<>();
-        announcement.put("Title", title);
-        announcement.put("Description", description);
-        announcement.put("Category", category);
-        announcement.put("Photo", photoUrl);
-        announcement.put("Number_of_likes", 50);
-        announcement.put("UserID", userId);
-        announcement.put("Creation", Timestamp.now());
-        announcement.put("End", end);
-        announcement.put("Coordinates", point);
+    public void addAnnouncement(Announcement announcement) {
+        Map<String, Object> announcementHash = new HashMap<>();
+        announcementHash.put("Title", announcement.Title);
+        announcementHash.put("Description", announcement.Description);
+        announcementHash.put("Category", announcement.Category.toArray());
+        announcementHash.put("Photo", announcement.Photo);
+        announcementHash.put("Number_of_likes", announcement.Number_of_likes);
+        announcementHash.put("UserID", announcement.UserID);
+        announcementHash.put("Creation", Timestamp.now());
+        announcementHash.put("End", announcement.End);
+        announcementHash.put("Coordinates", announcement.Coordinates);
 
-        announcementsCollection.add(announcement)
+        announcementsCollection.add(announcementHash)
                 .addOnSuccessListener(documentReference -> {
                     Log.d(TAG, "Announcement added with ID: " + documentReference.getId());
                 })
                 .addOnFailureListener(e -> {
                     Log.w(TAG, "Error adding announcement", e);
-                });
-    }
-
-    public void retrieveAnnouncements() {
-        announcementsCollection.get()
-                .addOnSuccessListener(queryDocumentSnapshots -> {
-                    for (QueryDocumentSnapshot document : queryDocumentSnapshots) {
-                        // Processing retrieved announcements
-                        // You can, for example, display them in the user interface
-                    }
-                })
-                .addOnFailureListener(e -> {
-                    Log.w(TAG, "Error retrieving announcements", e);
                 });
     }
 
@@ -226,64 +222,76 @@ public class DatabaseManager {
         newAnnouncement.Coordinates = document.getGeoPoint("Coordinates");
         return newAnnouncement;
     }
-    public List<Announcement> searchAnnouncementsByCategory(String category) {
-        final List<Announcement> result = new ArrayList<>();
 
-        // Définir les écouteurs pour gérer le succès et l'échec
-        OnSuccessListener<List<Announcement>> onSuccessListener = announcements -> {
-            result.addAll(announcements);
-        };
+    public interface ExecuteToListAfterQueryAction {
+        void applyToAnnouncements(List<Announcement> announcementList);
+    }
 
-        OnFailureListener onFailureListener = e -> {
-            Log.e(TAG, "Error searching announcements by category", e);
-        };
+    private DocumentSnapshot lastDocument = null;
 
-        // Appeler la fonction asynchrone avec les écouteurs définis ci-dessus
-        searchAnnouncementsByCategoryAsync(category, onSuccessListener, onFailureListener);
+    public void ResetLastDocument(){
+        lastDocument = null;
+    }
 
-        // Attendre que le résultat soit disponible (cette méthode bloquera le thread, il est recommandé de l'appeler depuis un thread différent du thread principal dans une application Android)
-        while (result.isEmpty()) {
-            // Attente passive
+    public void searchAnnouncementsByCategory(String category, ExecuteToListAfterQueryAction action) {
+        Query query = announcementsCollection.whereArrayContains("Category", category)
+                .limit(LimitPerBatch);
+
+        if (lastDocument != null){
+            query.startAfter(lastDocument);
         }
 
-        // Retourner le résultat une fois disponible
-        return result;
-    }
-    public void searchAnnouncementsByCategoryAsync(String category, OnSuccessListener<List<Announcement>> onSuccessListener, OnFailureListener onFailureListener) {
-        Query query = announcementsCollection.whereArrayContains("Category", category);
-
         query.get()
                 .addOnSuccessListener(queryDocumentSnapshots -> {
-                    List<Announcement> idsAnnouncements = new ArrayList<>();
+                    List<Announcement> announcementList = new ArrayList<>();
                     for (QueryDocumentSnapshot document : queryDocumentSnapshots) {
                         Announcement newAnnouncement = createAnnouncementFromDocument(document);
-                        idsAnnouncements.add(newAnnouncement);
+                        announcementList.add(newAnnouncement);
                     }
-                    onSuccessListener.onSuccess(idsAnnouncements);
+                    lastDocument = queryDocumentSnapshots.getDocuments()
+                            .get(queryDocumentSnapshots.getDocuments().size() - 1);
+
+                    action.applyToAnnouncements(announcementList);
                 })
-                .addOnFailureListener(onFailureListener);
+                .addOnFailureListener(e -> {
+                    Log.e(TAG, "Couldn't get the announcements with the given category.");
+                });
     }
-    public void searchAnnouncementsOrderByLikes(OnSuccessListener<List<Announcement>> onSuccessListener, OnFailureListener onFailureListener) {
+
+    public void searchAnnouncementsOrderByLikes(ExecuteToListAfterQueryAction action) {
         // Create a query to retrieve announcements ordered by number of likes in descending order
-        Query query = announcementsCollection.orderBy("Number_of_likes", Query.Direction.DESCENDING);
+        Query query = announcementsCollection.orderBy("Number_of_likes", Query.Direction.DESCENDING)
+                .limit(LimitPerBatch);
+
+        if (lastDocument != null){
+            query.startAfter(lastDocument);
+        }
 
         query.get()
                 .addOnSuccessListener(queryDocumentSnapshots -> {
-                    List<Announcement> announcements = new ArrayList<>();
+                    List<Announcement> announcementList = new ArrayList<>();
                     for (QueryDocumentSnapshot document : queryDocumentSnapshots) {
-                        // Create an Announcement object from document data
                         Announcement newAnnouncement = createAnnouncementFromDocument(document);
-                        // Add the announcement to the list
-                        announcements.add(newAnnouncement);
+                        announcementList.add(newAnnouncement);
                     }
-                    // Send the sorted list to the success listener
-                    onSuccessListener.onSuccess(announcements);
+                    lastDocument = queryDocumentSnapshots.getDocuments()
+                            .get(queryDocumentSnapshots.getDocuments().size() - 1);
+
+                    action.applyToAnnouncements(announcementList);
                 })
-                .addOnFailureListener(onFailureListener);
+                .addOnFailureListener(e -> {
+                    Log.e(TAG, "Couldn't get the announcements.");
+                });
     }
-    public void searchAnnouncementsOrderByProximity(OnSuccessListener<List<Announcement>> onSuccessListener, OnFailureListener onFailureListener, GeoPoint point) {
+    public void searchAnnouncementsOrderByProximity(ExecuteToListAfterQueryAction action, GeoPoint point) {
         // Create a query to retrieve all announcements
-        announcementsCollection.get()
+        Query query = announcementsCollection.limit(LimitPerBatch);
+
+        if (lastDocument != null){
+            query.startAfter(lastDocument);
+        }
+
+        query.get()
                 .addOnSuccessListener(queryDocumentSnapshots -> {
                     List<Announcement> announcements = new ArrayList<>();
                     for (QueryDocumentSnapshot document : queryDocumentSnapshots) {
@@ -296,12 +304,17 @@ public class DatabaseManager {
                         // Add the announcement to the list
                         announcements.add(newAnnouncement);
                     }
+                    lastDocument = queryDocumentSnapshots.getDocuments()
+                            .get(queryDocumentSnapshots.getDocuments().size() - 1);
+
                     // Sort the list of announcements by proximity
                     sortAnnouncementsByDistance(announcements);
-                    // Send the sorted list to the success listener
-                    onSuccessListener.onSuccess(announcements);
+
+                    action.applyToAnnouncements(announcements);
                 })
-                .addOnFailureListener(onFailureListener);
+                .addOnFailureListener(e -> {
+                    Log.e(TAG, "Couldn't get the announcements.");
+                });
     }
     public void sortAnnouncementsByDistance(List<Announcement> announcements) {
         // Implementation of Bubble Sort to sort announcements by distance
