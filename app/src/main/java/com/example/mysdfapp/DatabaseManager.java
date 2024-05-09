@@ -5,7 +5,6 @@ import android.util.Log;
 
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.Timestamp;
-import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FieldValue;
 import com.google.firebase.firestore.FirebaseFirestore;
 
@@ -14,17 +13,12 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import android.util.Log;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentReference;
-import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.GeoPoint;
 import com.google.firebase.firestore.Query;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
-
-import java.util.HashMap;
-import java.util.Map;
 
 public class DatabaseManager {
 
@@ -33,14 +27,84 @@ public class DatabaseManager {
     private FirebaseFirestore db;
     private CollectionReference announcementsCollection;
     public CollectionReference categoryCollection;
-    private CollectionReference likesCollection;
+    private CollectionReference updateCollection;
 
     public DatabaseManager() {
         db = FirebaseFirestore.getInstance();
         announcementsCollection = db.collection("announcements");
         categoryCollection = db.collection("Category");
-
+        updateCollection = db.collection("uptdate");
     }
+    public void Update() {
+        // Obtient la référence du document contenant la dernière mise à jour
+        DocumentReference lastUpdateDocRef = updateCollection.document("last_update");
+
+        lastUpdateDocRef.get()
+                .addOnSuccessListener(documentSnapshot -> {
+                    if (documentSnapshot.exists()) {
+                        Timestamp lastUpdateTimeStamp = documentSnapshot.getTimestamp("timestamp");
+                        if (lastUpdateTimeStamp != null) {
+                            // Obtient le timestamp actuel
+                            Timestamp currentTimestamp = Timestamp.now();
+
+                            // Calcul de la différence entre le timestamp actuel et le timestamp de la dernière mise à jour
+                            long differenceInMillis = currentTimestamp.getSeconds() * 1000 - lastUpdateTimeStamp.getSeconds() * 1000;
+
+                            // Vérifie si la différence est supérieure à 24 heures (en millisecondes)
+                            if (differenceInMillis > 24 * 60 * 60 * 1000) {
+                                // Met à jour le document avec le nouveau timestamp
+                                updatelike();
+                                lastUpdateDocRef.update("timestamp", currentTimestamp)
+                                        .addOnSuccessListener(aVoid -> {
+                                            Log.d(TAG, "Last update timestamp updated successfully");
+                                        })
+                                        .addOnFailureListener(e -> {
+                                            Log.w(TAG, "Error updating last update timestamp", e);
+                                        });
+                            }
+                        }
+                    } else {
+                        // Le document de la dernière mise à jour n'existe pas, nous devons le créer avec le timestamp actuel
+                        Timestamp currentTimestamp = Timestamp.now();
+                        lastUpdateDocRef.set(new HashMap<String, Object>() {{
+                                    put("timestamp", currentTimestamp);
+                                }})
+                                .addOnSuccessListener(aVoid -> {
+                                    Log.d(TAG, "Last update timestamp created successfully");
+                                })
+                                .addOnFailureListener(e -> {
+                                    Log.w(TAG, "Error creating last update timestamp", e);
+                                });
+                    }
+                })
+                .addOnFailureListener(e -> {
+                    Log.w(TAG, "Error getting last update timestamp", e);
+                });
+    }
+
+    public void updatelike() {
+        announcementsCollection.get()
+                .addOnSuccessListener(queryDocumentSnapshots -> {
+                    for (QueryDocumentSnapshot document : queryDocumentSnapshots) {
+                        // Incrémentation du nombre de likes
+                        document.getReference().update("Number_of_likes", FieldValue.increment(1))
+                                .addOnSuccessListener(aVoid -> {
+                                    // Vérifie si le nombre de likes est devenu zéro après l'incrémentation
+                                    Long numberOfLikes = document.getLong("Number_of_likes");
+                                    if (numberOfLikes != null && numberOfLikes == 0) {
+                                        deleteAnnouncement(document.getId());
+                                    }
+                                })
+                                .addOnFailureListener(e -> {
+                                    Log.w(TAG, "Error updating likes", e);
+                                });
+                    }
+                })
+                .addOnFailureListener(e -> {
+                    Log.w(TAG, "Error retrieving announcements", e);
+                });
+    }
+
     public void addCategory(String[] category) {
         Map<String, Object> Category = new HashMap<>();
         Category.put("Category_Champ", category);
