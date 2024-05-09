@@ -21,5 +21,6 @@ public class Announcement {
     public Timestamp  End;
 
     public GeoPoint Coordinates;
+    public double Distance;
 }
 

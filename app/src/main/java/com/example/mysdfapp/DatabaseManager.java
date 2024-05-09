@@ -9,6 +9,7 @@ import com.google.firebase.firestore.FieldValue;
 import com.google.firebase.firestore.FirebaseFirestore;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -36,7 +37,7 @@ public class DatabaseManager {
         updateCollection = db.collection("uptdate");
     }
     public void Update() {
-        // Obtient la référence du document contenant la dernière mise à jour
+        // Get the reference of the document containing the last update
         DocumentReference lastUpdateDocRef = updateCollection.document("last_update");
 
         lastUpdateDocRef.get()
@@ -44,15 +45,15 @@ public class DatabaseManager {
                     if (documentSnapshot.exists()) {
                         Timestamp lastUpdateTimeStamp = documentSnapshot.getTimestamp("timestamp");
                         if (lastUpdateTimeStamp != null) {
-                            // Obtient le timestamp actuel
+                            // Get the current timestamp
                             Timestamp currentTimestamp = Timestamp.now();
 
-                            // Calcul de la différence entre le timestamp actuel et le timestamp de la dernière mise à jour
+                            // Calculate the difference between the current timestamp and the timestamp of the last update
                             long differenceInMillis = currentTimestamp.getSeconds() * 1000 - lastUpdateTimeStamp.getSeconds() * 1000;
 
-                            // Vérifie si la différence est supérieure à 24 heures (en millisecondes)
+                            // Check if the difference is greater than 24 hours (in milliseconds)
                             if (differenceInMillis > 24 * 60 * 60 * 1000) {
-                                // Met à jour le document avec le nouveau timestamp
+                                // Update the document with the new timestamp
                                 updatelike();
                                 lastUpdateDocRef.update("timestamp", currentTimestamp)
                                         .addOnSuccessListener(aVoid -> {
@@ -64,7 +65,7 @@ public class DatabaseManager {
                             }
                         }
                     } else {
-                        // Le document de la dernière mise à jour n'existe pas, nous devons le créer avec le timestamp actuel
+                        // The document of the last update does not exist, we need to create it with the current timestamp
                         Timestamp currentTimestamp = Timestamp.now();
                         lastUpdateDocRef.set(new HashMap<String, Object>() {{
                                     put("timestamp", currentTimestamp);
@@ -86,18 +87,24 @@ public class DatabaseManager {
         announcementsCollection.get()
                 .addOnSuccessListener(queryDocumentSnapshots -> {
                     for (QueryDocumentSnapshot document : queryDocumentSnapshots) {
-                        // Incrémentation du nombre de likes
-                        document.getReference().update("Number_of_likes", FieldValue.increment(1))
-                                .addOnSuccessListener(aVoid -> {
-                                    // Vérifie si le nombre de likes est devenu zéro après l'incrémentation
-                                    Long numberOfLikes = document.getLong("Number_of_likes");
-                                    if (numberOfLikes != null && numberOfLikes == 0) {
-                                        deleteAnnouncement(document.getId());
-                                    }
-                                })
-                                .addOnFailureListener(e -> {
-                                    Log.w(TAG, "Error updating likes", e);
-                                });
+                        Timestamp endTimestamp = document.getTimestamp("End");
+                        // Check if the end date is in the past
+                        if (endTimestamp != null && endTimestamp.toDate().before(Timestamp.now().toDate())) {
+                            deleteAnnouncement(document.getId());
+                        } else {
+                            // Increment the number of likes
+                            document.getReference().update("Number_of_likes", FieldValue.increment(1))
+                                    .addOnSuccessListener(aVoid -> {
+                                        // Check if the number of likes became zero after incrementing
+                                        Long numberOfLikes = document.getLong("Number_of_likes");
+                                        if (numberOfLikes != null && numberOfLikes == 0) {
+                                            deleteAnnouncement(document.getId());
+                                        }
+                                    })
+                                    .addOnFailureListener(e -> {
+                                        Log.w(TAG, "Error updating likes", e);
+                                    });
+                        }
                     }
                 })
                 .addOnFailureListener(e -> {
@@ -170,10 +177,10 @@ public class DatabaseManager {
                 });
     }
 
-    public void increaseLikesAnnouncement(String announcementId) {
+    public void LikesAnnouncement(String announcementId,int value) {
         DocumentReference announcementRef = announcementsCollection.document(announcementId);
 
-        announcementRef.update("Number_of_likes", FieldValue.increment(1))
+        announcementRef.update("Number_of_likes", FieldValue.increment(value))
                 .addOnSuccessListener(aVoid -> {
                     Log.d(TAG, "Number_of_likes of announcement increased successfully");
                 })
@@ -205,6 +212,20 @@ public class DatabaseManager {
                     Log.w(TAG, "Error updating Categories of announcement", e);
                 });
     }
+    public Announcement createAnnouncementFromDocument(QueryDocumentSnapshot document){
+        Announcement newAnnouncement = new Announcement();
+        newAnnouncement.ID = document.getId();
+        newAnnouncement.Title = document.getString("Title");
+        newAnnouncement.Description = document.getString("Description");
+        newAnnouncement.Category = (List<String>) document.get("Category");
+        newAnnouncement.Photo = document.getString("Photo");
+        newAnnouncement.Number_of_likes = document.getLong("Number_of_likes");
+        newAnnouncement.UserID = document.getString("UserID");
+        newAnnouncement.Creation = document.getTimestamp("Creation");
+        newAnnouncement.End = document.getTimestamp("End");
+        newAnnouncement.Coordinates = document.getGeoPoint("Coordinates");
+        return newAnnouncement;
+    }
     public void searchAnnouncementsByCategory(String category, OnSuccessListener<List<Announcement>> onSuccessListener, OnFailureListener onFailureListener) {
         Query query = announcementsCollection.whereArrayContains("Category", category);
 
@@ -212,21 +233,76 @@ public class DatabaseManager {
                 .addOnSuccessListener(queryDocumentSnapshots -> {
                     List<Announcement> idsAnnouncements = new ArrayList<>();
                     for (QueryDocumentSnapshot document : queryDocumentSnapshots) {
-                        Announcement newAnnouncement = new Announcement();
-                        newAnnouncement.ID = document.getId();
-                        newAnnouncement.Title = document.getString("Title");
-                        newAnnouncement.Description = document.getString("Description");
-                        newAnnouncement.Category = (List<String>) document.get("Category");
-                        newAnnouncement.Photo = document.getString("Photo");
-                        newAnnouncement.Number_of_likes = document.getLong("Number_of_likes");
-                        newAnnouncement.UserID = document.getString("UserID");
-                        newAnnouncement.Creation = document.getTimestamp("Creation");
-                        newAnnouncement.End = document.getTimestamp("End");
-                        newAnnouncement.Coordinates = document.getGeoPoint("Coordinates");
+                        Announcement newAnnouncement = createAnnouncementFromDocument(document);
                         idsAnnouncements.add(newAnnouncement);
                     }
                     onSuccessListener.onSuccess(idsAnnouncements);
                 })
                 .addOnFailureListener(onFailureListener);
+    }
+    public void searchAnnouncementsOrderByLikes(OnSuccessListener<List<Announcement>> onSuccessListener, OnFailureListener onFailureListener) {
+        // Create a query to retrieve announcements ordered by number of likes in descending order
+        Query query = announcementsCollection.orderBy("Number_of_likes", Query.Direction.DESCENDING);
+
+        query.get()
+                .addOnSuccessListener(queryDocumentSnapshots -> {
+                    List<Announcement> announcements = new ArrayList<>();
+                    for (QueryDocumentSnapshot document : queryDocumentSnapshots) {
+                        // Create an Announcement object from document data
+                        Announcement newAnnouncement = createAnnouncementFromDocument(document);
+                        // Add the announcement to the list
+                        announcements.add(newAnnouncement);
+                    }
+                    // Send the sorted list to the success listener
+                    onSuccessListener.onSuccess(announcements);
+                })
+                .addOnFailureListener(onFailureListener);
+    }
+    public void searchAnnouncementsOrderByProximity(OnSuccessListener<List<Announcement>> onSuccessListener, OnFailureListener onFailureListener, GeoPoint point) {
+        // Create a query to retrieve all announcements
+        announcementsCollection.get()
+                .addOnSuccessListener(queryDocumentSnapshots -> {
+                    List<Announcement> announcements = new ArrayList<>();
+                    for (QueryDocumentSnapshot document : queryDocumentSnapshots) {
+                        // Create an Announcement object from document data
+                        Announcement newAnnouncement = createAnnouncementFromDocument(document);
+                        // Calculate the distance between the specified point and the announcement's point
+                        double distance = calculateDistance(point, newAnnouncement.Coordinates);
+                        // Set the distance in the announcement
+                        newAnnouncement.Distance = distance;
+                        // Add the announcement to the list
+                        announcements.add(newAnnouncement);
+                    }
+                    // Sort the list of announcements by proximity
+                    sortAnnouncementsByDistance(announcements);
+                    // Send the sorted list to the success listener
+                    onSuccessListener.onSuccess(announcements);
+                })
+                .addOnFailureListener(onFailureListener);
+    }
+    public void sortAnnouncementsByDistance(List<Announcement> announcements) {
+        // Implementation of Bubble Sort to sort announcements by distance
+        int n = announcements.size();
+        boolean swapped;
+        do {
+            swapped = false;
+            for (int i = 1; i < n; i++) {
+                Announcement current = announcements.get(i);
+                Announcement previous = announcements.get(i - 1);
+                if (current.Distance < previous.Distance) {
+                    // Swap the announcements if they are not in the correct order
+                    announcements.set(i, previous);
+                    announcements.set(i - 1, current);
+                    swapped = true;
+                }
+            }
+            n--;
+        } while (swapped);
+    }
+
+    private double calculateDistance(GeoPoint point1, GeoPoint point2) {
+        double dx = point1.getLatitude() - point2.getLatitude();
+        double dy = point1.getLongitude() - point2.getLongitude();
+        return Math.sqrt(dx * dx + dy * dy);
     }
 }
