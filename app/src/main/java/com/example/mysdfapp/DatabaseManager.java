@@ -226,7 +226,30 @@ public class DatabaseManager {
         newAnnouncement.Coordinates = document.getGeoPoint("Coordinates");
         return newAnnouncement;
     }
-    public void searchAnnouncementsByCategory(String category, OnSuccessListener<List<Announcement>> onSuccessListener, OnFailureListener onFailureListener) {
+    public List<Announcement> searchAnnouncementsByCategory(String category) {
+        final List<Announcement> result = new ArrayList<>();
+
+        // Définir les écouteurs pour gérer le succès et l'échec
+        OnSuccessListener<List<Announcement>> onSuccessListener = announcements -> {
+            result.addAll(announcements);
+        };
+
+        OnFailureListener onFailureListener = e -> {
+            Log.e(TAG, "Error searching announcements by category", e);
+        };
+
+        // Appeler la fonction asynchrone avec les écouteurs définis ci-dessus
+        searchAnnouncementsByCategoryAsync(category, onSuccessListener, onFailureListener);
+
+        // Attendre que le résultat soit disponible (cette méthode bloquera le thread, il est recommandé de l'appeler depuis un thread différent du thread principal dans une application Android)
+        while (result.isEmpty()) {
+            // Attente passive
+        }
+
+        // Retourner le résultat une fois disponible
+        return result;
+    }
+    public void searchAnnouncementsByCategoryAsync(String category, OnSuccessListener<List<Announcement>> onSuccessListener, OnFailureListener onFailureListener) {
         Query query = announcementsCollection.whereArrayContains("Category", category);
 
         query.get()
