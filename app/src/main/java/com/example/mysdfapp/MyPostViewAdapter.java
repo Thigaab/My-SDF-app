@@ -9,9 +9,13 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
+import java.util.List;
+
 public class MyPostViewAdapter extends RecyclerView.Adapter<MyPostViewAdapter.ViewHolder> {
 
     // Variable for post list
+    public List<Announcement> AnnouncementList;
+    public DatabaseManager DatabaseManager;
 
     public MyPostViewAdapter(OnItemClickListener clickListener){
         //Initialize things
@@ -34,8 +38,8 @@ public class MyPostViewAdapter extends RecyclerView.Adapter<MyPostViewAdapter.Vi
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
         // Gets the data from the post at the position
-        String title = "Title";
-        String likeNumber = "Number";
+        String title = AnnouncementList.get(position).Title;
+        String likeNumber = AnnouncementList.get(position).Number_of_likes.toString();
 
         // Update the view holder with the information found at the position
         holder.PostTitle.setText(title);
@@ -44,7 +48,10 @@ public class MyPostViewAdapter extends RecyclerView.Adapter<MyPostViewAdapter.Vi
             @Override
             public void onClick(View v) {
                 // Remove the post at the position
-                //notifyItemRemoved(position);
+                int positionAnnouncement = holder.getPosition();
+                DatabaseManager.deleteAnnouncement(AnnouncementList.get(positionAnnouncement).ID);
+                AnnouncementList.remove(positionAnnouncement);
+                notifyItemRemoved(positionAnnouncement);
             }
         });
     }
@@ -52,7 +59,7 @@ public class MyPostViewAdapter extends RecyclerView.Adapter<MyPostViewAdapter.Vi
     @Override
     public int getItemCount() {
         // Returns the size of the post list
-        return 0;
+        return AnnouncementList.size();
     }
 
     public static class ViewHolder extends RecyclerView.ViewHolder{

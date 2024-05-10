@@ -8,6 +8,7 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import androidx.fragment.app.Fragment;
+import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
@@ -48,6 +49,7 @@ public class PostListFragment extends Fragment {
         _postAdapter.AnnouncementList = new ArrayList<>();
         _postAdapter.DatabaseManager = _databaseManager;
 
+        _recyclerView.setLayoutManager(new LinearLayoutManager(_mainActivity));
         _recyclerView.setAdapter(_postAdapter);
 
         _loadButton.setOnClickListener(new View.OnClickListener() {

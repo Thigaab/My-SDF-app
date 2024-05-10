@@ -124,14 +124,27 @@ public class MainActivity extends AppCompatActivity {
         _categories = new ArrayList<>();
         ArrayAdapter<String> categoryAdapter = new ArrayAdapter<>(this, androidx.appcompat.R.layout.support_simple_spinner_dropdown_item, _categories);
         _keywordSpinner.setAdapter(categoryAdapter);
+        _keywordSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                _currentCategory = _categories.get(position);
+            }
 
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
+                // Nothing
+            }
+        });
 
         _databaseManager.retrieveCategory(new DatabaseManager.ExecuteAfterCategoryQuery() {
             @Override
             public void applyToCategories(List<String> categories) {
+                String log = "Categories fetched: ";
                 for (String category : categories){
                     _categories.add(category);
+                    log += category + " ";
                 }
+                Log.i("MainActivity", log);
                 categoryAdapter.notifyDataSetChanged();
             }
         });
