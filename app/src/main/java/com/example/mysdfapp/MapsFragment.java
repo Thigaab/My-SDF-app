@@ -39,6 +39,7 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback {
 
     double targetLat = 0;
     double targetLng = 0;
+    String targetLabel = "";
     private Button btnGetDirection;
 
     @Override
@@ -100,7 +101,7 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback {
     public void onMapReady(@NonNull GoogleMap googleMap) {
         myMap = googleMap;
 
-        myMap.addMarker(new MarkerOptions().position(new LatLng(targetLat, targetLng)).title("target"));
+        myMap.addMarker(new MarkerOptions().position(new LatLng(targetLat, targetLng)).title(targetLabel));
 
         LatLng me = new LatLng(currentLocation.getLatitude(), currentLocation.getLongitude());
         MarkerOptions options = new MarkerOptions().position(me).title("Me");
@@ -122,9 +123,10 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback {
         }
     }
 
-    public void setDestination(double latitude, double longitude) {
+    public void setDestination(double latitude, double longitude, String label) {
         this.targetLat = latitude;
         this.targetLng = longitude;
+        this.targetLabel = label;
     }
 
     public void clearDestination() {
