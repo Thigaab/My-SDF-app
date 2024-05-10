@@ -184,8 +184,8 @@ public class CreateAnnouncementFragment extends Fragment {
                         }
 
                         Announcement announcement = new Announcement();
-                        announcement.Title = title;
-                        announcement.Description = description;
+                        announcement.Title = textSanitizer.filterBadWords(title);
+                        announcement.Description = textSanitizer.filterBadWords(description);
                         announcement.Category = new ArrayList<>();
                         announcement.Category.add(selectedCategory);
                         announcement.Photo = "";
