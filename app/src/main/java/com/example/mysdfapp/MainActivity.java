@@ -205,7 +205,7 @@ public class MainActivity extends AppCompatActivity {
 
         if (ContextCompat.checkSelfPermission(this, ACCESS_COARSE_LOCATION)
                 != PackageManager.PERMISSION_GRANTED) {
-            // Demander la permission
+            // Ask permission
             ActivityCompat.requestPermissions(this, new String[]{ACCESS_COARSE_LOCATION}, 12345);
         }
     }
@@ -217,7 +217,7 @@ public class MainActivity extends AppCompatActivity {
                 .commit();
     }
 
-    private void commitFragment(Fragment fragment, String tag) {
+    public void commitFragment(Fragment fragment, String tag) {
         _fragmentManager.beginTransaction()
                 .replace(R.id.main_fragment_container, fragment)
                 .addToBackStack(tag)
@@ -248,18 +248,16 @@ public class MainActivity extends AppCompatActivity {
 
         if (id == android.R.id.home) {
             if (getSupportFragmentManager().getBackStackEntryCount() > 0) {
-                // S'il y a des fragments dans la pile de retour arrière, revenir au précédent
                 getSupportFragmentManager().popBackStack();
             } else {
-                // Sinon, comportement par défaut (quitter l'activité)
                 onBackPressed();
             }
         }
 
-        Intent intent = new Intent(getApplicationContext(), UserOptionsActivity.class);
-        startActivity(intent);
-        finish();
-
+        if (id == R.id.action_settings){
+            UserOptionsFragment newFragment = new UserOptionsFragment();
+            commitFragment(newFragment, null);
+        }
 
         return super.onOptionsItemSelected(item);
     }
