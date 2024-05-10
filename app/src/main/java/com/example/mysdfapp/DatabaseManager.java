@@ -161,7 +161,9 @@ public class DatabaseManager {
         announcementHash.put("Number_of_likes", announcement.Number_of_likes);
         announcementHash.put("UserID", announcement.UserID);
         announcementHash.put("Creation", Timestamp.now());
-        announcementHash.put("End", announcement.End);
+        if (announcement.End != null){
+            announcementHash.put("End", announcement.End);
+        }
         announcementHash.put("Coordinates", announcement.Coordinates);
 
         announcementsCollection.add(announcementHash)
