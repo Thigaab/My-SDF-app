@@ -73,6 +73,9 @@ public class PostListFragment extends Fragment {
         Log.i("PostListFragment","end of fragment's create view");
         _mainActivity.setToolbarTitle("Discover new discounts");
         _mainActivity.setBackButtonEnabled(false);
+        _mainActivity.showFloatingButton(true);
+        _mainActivity.FloatingButtonSwitchToMySpaceMode();
+        _mainActivity.setFloatingButtonIcon(android.R.drawable.ic_menu_myplaces);
 
         return view;
     }

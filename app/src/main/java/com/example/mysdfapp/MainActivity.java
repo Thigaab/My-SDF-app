@@ -51,7 +51,38 @@ public class MainActivity extends AppCompatActivity {
     private Spinner _keywordSpinner;
     private Toolbar _toolbar;
     private FloatingActionButton _myspaceButton;
+    public void showFloatingButton(boolean enabled){
+        if (enabled){
+            _myspaceButton.setVisibility(View.VISIBLE);
+        }
+        else{
+            _myspaceButton.setVisibility(View.GONE);
+        }
+    }
+    public void FloatingButtonSwitchToAddMode(){
+        _myspaceButton.setOnClickListener(_addListener);
+    }
+    public void FloatingButtonSwitchToMySpaceMode(){
+        _myspaceButton.setOnClickListener(_myspaceListener);
+    }
+    public void setFloatingButtonIcon(int resID){
+        _myspaceButton.setImageResource(resID);
+    }
 
+    private View.OnClickListener _myspaceListener = new View.OnClickListener() {
+        @Override
+        public void onClick(View v) {
+            MyPostListFragment newFragment = new MyPostListFragment();
+            commitFragment(newFragment, null);
+        }
+    };
+    private View.OnClickListener _addListener = new View.OnClickListener() {
+        @Override
+        public void onClick(View v) {
+            CreateAnnouncementFragment newFragment = new CreateAnnouncementFragment();
+            commitFragment(newFragment, null);
+        }
+    };
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -151,13 +182,7 @@ public class MainActivity extends AppCompatActivity {
 
 
 
-        _myspaceButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                MyPostListFragment newFragment = new MyPostListFragment();
-                commitFragment(newFragment, null);
-            }
-        });
+        _myspaceButton.setOnClickListener(_myspaceListener);
     }
 
     private void substituteFragment(Fragment fragment){

@@ -61,6 +61,9 @@ public class MyPostListFragment extends Fragment {
         Log.i("MyPostListFragment","end of fragment's create view");
         _mainActivity.setToolbarTitle("Your posts");
         _mainActivity.setBackButtonEnabled(true);
+        _mainActivity.showFloatingButton(true);
+        _mainActivity.FloatingButtonSwitchToAddMode();
+        _mainActivity.setFloatingButtonIcon(android.R.drawable.ic_menu_add);
 
         return view;
     }
