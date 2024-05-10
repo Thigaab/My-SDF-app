@@ -3,6 +3,7 @@ package com.example.mysdfapp;
 import static android.Manifest.permission.ACCESS_COARSE_LOCATION;
 
 import android.Manifest.permission;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.location.Location;
 import android.location.LocationManager;
@@ -254,6 +255,10 @@ public class MainActivity extends AppCompatActivity {
                 onBackPressed();
             }
         }
+
+        Intent intent = new Intent(getApplicationContext(), UserOptionsActivity.class);
+        startActivity(intent);
+        finish();
 
 
         return super.onOptionsItemSelected(item);
