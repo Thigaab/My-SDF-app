@@ -9,7 +9,7 @@
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Create an Announcement"
+        android:text="Create an announcement"
         android:textSize="24sp"
         android:textColor="@color/black"
         android:layout_gravity="center_horizontal"
@@ -70,19 +70,19 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="End Date : "
+            android:text="End Date: "
             android:textSize="18sp"
             android:textColor="@color/black"/>
 
-        <Button
-            android:id="@+id/buttonEndDate"
-            android:layout_width="wrap_content"
+        <EditText
+            android:id="@+id/editTextEndDate"
+            android:layout_width="0dp"
+            android:layout_weight="1"
             android:layout_height="wrap_content"
-            android:text="Choose Date"
-            android:textSize="16sp"
-            android:textColor="@color/white"
-            android:background="@color/green"
-            android:layout_marginStart="8dp"/>
+            android:background="@drawable/edittext_bg"
+            android:padding="8dp"
+            android:layout_marginStart="8dp"
+            android:hint="Choose the date"/>
 
     </LinearLayout>
 
@@ -95,19 +95,36 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Geographic Coordinates : "
+            android:text="Latitude: "
             android:textSize="18sp"
             android:textColor="@color/black"/>
 
-        <Button
-            android:id="@+id/buttonCoordinates"
+        <EditText
+            android:id="@+id/editTextLatitude"
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:layout_height="wrap_content"
+            android:background="@drawable/edittext_bg"
+            android:padding="8dp"
+            android:layout_marginStart="8dp"
+            android:hint="Enter latitude"/>
+
+        <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Choose Coordinates"
-            android:textSize="16sp"
-            android:textColor="@color/white"
-            android:background="@color/orange"
-            android:layout_marginStart="8dp"/>
+            android:text="Longitude: "
+            android:textSize="18sp"
+            android:textColor="@color/black"/>
+
+        <EditText
+            android:id="@+id/editTextLongitude"
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:layout_height="wrap_content"
+            android:background="@drawable/edittext_bg"
+            android:padding="8dp"
+            android:layout_marginStart="8dp"
+            android:hint="Enter longitude"/>
 
     </LinearLayout>
 
