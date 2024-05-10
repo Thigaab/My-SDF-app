@@ -2,6 +2,11 @@
     <string name="app_name">My SDF app</string>
     <string name="action_settings">Settings</string>
 
+
+    <string name="Title">Title</string>
+
+
+
     <string name="login">Login</string>
     <string name="email">Email</string>
     <string name="password">Passeword</string>
@@ -60,4 +65,8 @@
     <string name="newPost_titlePrompt">Insert title here</string>
     <string name="newPost_descriptionPrompt">Insert description here</string>
     <string name="geo_button_label">See location on the map</string>
+    <string name="Description">Description</string>
+    <string name="enter_title">Enter Title</string>
+    <string name="enter_description">Enter Description</string>
+
 </resources>
