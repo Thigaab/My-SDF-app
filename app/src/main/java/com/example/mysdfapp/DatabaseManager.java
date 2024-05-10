@@ -156,7 +156,7 @@ public class DatabaseManager {
         Map<String, Object> announcementHash = new HashMap<>();
         announcementHash.put("Title", announcement.Title);
         announcementHash.put("Description", announcement.Description);
-        announcementHash.put("Category", announcement.Category.toArray());
+        announcementHash.put("Category", announcement.Category);
         announcementHash.put("Photo", announcement.Photo);
         announcementHash.put("Number_of_likes", announcement.Number_of_likes);
         announcementHash.put("UserID", announcement.UserID);
