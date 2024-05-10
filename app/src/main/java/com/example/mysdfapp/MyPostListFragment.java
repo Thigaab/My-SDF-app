@@ -14,20 +14,19 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
 import java.util.ArrayList;
-import java.util.List;
 
-public class PostListFragment extends Fragment {
+public class MyPostListFragment extends Fragment {
 
     private MainActivity _mainActivity;
     private DatabaseManager _databaseManager;
     private RecyclerView _recyclerView;
-    private PostViewAdapter _postAdapter;
+    private MyPostViewAdapter _myPostAdapter;
     private FloatingActionButton _loadButton;
 
     @Override
     public void onAttach(Context context){
         super.onAttach(context);
-        Log.i("PostListFragment","Fragment's on attach");
+        Log.i("MyPostListFragment","Fragment's on attach");
         if (context instanceof MainActivity){
             _mainActivity = (MainActivity) context;
             _databaseManager = _mainActivity.getDatabaseManager();
@@ -40,42 +39,31 @@ public class PostListFragment extends Fragment {
         _recyclerView = view.findViewById(R.id.post_list_recyclerView);
         _loadButton = view.findViewById(R.id.post_list_loadMore);
 
-        _postAdapter = new PostViewAdapter(new PostViewAdapter.OnItemClickListener() {
+        _myPostAdapter = new MyPostViewAdapter(new MyPostViewAdapter.OnItemClickListener() {
             @Override
             public void onItemClick(View view, int position) {
                 // Expend fragment with the given post info
             }
         });
-        _postAdapter.AnnouncementList = new ArrayList<>();
-        _postAdapter.DatabaseManager = _databaseManager;
+        _myPostAdapter.AnnouncementList = new ArrayList<>();
+        _myPostAdapter.DatabaseManager = _databaseManager;
 
         _recyclerView.setLayoutManager(new LinearLayoutManager(_mainActivity));
-        _recyclerView.setAdapter(_postAdapter);
+        _recyclerView.setAdapter(_myPostAdapter);
 
         _loadButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                _mainActivity.fetchInDatabase(new DatabaseManager.ExecuteToListAfterQueryAction() {
-                    @Override
-                    public void applyToAnnouncements(List<Announcement> announcementList) {
-                        if (announcementList.size() > 0){
-                            int startPosition = _postAdapter.getItemCount();
-                            for (Announcement announcement : announcementList){
-                                _postAdapter.AnnouncementList.add(announcement);
-                            }
-                            _postAdapter.notifyItemRangeInserted(startPosition, announcementList.size());
-                        }
-                    }
-                });
+                // Fetch additional elements from user in database
             }
         });
 
-        Log.i("PostListFragment","end of fragment's create view");
-        _mainActivity.setToolbarTitle("Discover new discounts");
-        _mainActivity.setBackButtonEnabled(false);
+        Log.i("MyPostListFragment","end of fragment's create view");
+        _mainActivity.setToolbarTitle("Your posts");
+        _mainActivity.setBackButtonEnabled(true);
         _mainActivity.showFloatingButton(true);
-        _mainActivity.FloatingButtonSwitchToMySpaceMode();
-        _mainActivity.setFloatingButtonIcon(android.R.drawable.ic_menu_myplaces);
+        _mainActivity.FloatingButtonSwitchToAddMode();
+        _mainActivity.setFloatingButtonIcon(android.R.drawable.ic_menu_add);
 
         return view;
     }

@@ -58,6 +58,10 @@
     <string name="newPost_titlePrompt">Insert title here</string>
     <string name="newPost_descriptionPrompt">Insert description here</string>
     <string name="geo_button_label">See location on the map</string>
+    <string name="Description">Description</string>
+    <string name="enter_title">Enter Title</string>
+    <string name="enter_description">Enter Description</string>
+    <string name="createAnnouncementLabel">Create Announcement</string>
     <string name="endDate_label">End Date</string>
     <string name="endDate_prompt">Insert end date here</string>
 </resources>

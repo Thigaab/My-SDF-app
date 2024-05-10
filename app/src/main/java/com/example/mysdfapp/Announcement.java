@@ -23,3 +23,4 @@ public class Announcement {
     public GeoPoint Coordinates;
     public double Distance;
 }
+
