@@ -8,18 +8,23 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.DatePicker;
 import android.widget.EditText;
+import android.widget.Spinner;
 import android.widget.Toast;
 
 import androidx.fragment.app.Fragment;
 
 import com.google.firebase.Timestamp;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.GeoPoint;
 
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 public class CreateAnnouncementFragment extends Fragment {
 
@@ -30,15 +35,18 @@ public class CreateAnnouncementFragment extends Fragment {
     private EditText endDateEditText;
     private EditText latitudeEditText;
     private EditText longitudeEditText;
+    private Spinner _keywordSpinner;
     private Button createButton;
     private FirebaseAuth mAuth;
+    private FirebaseUser _user;
     public void onAttach(Context context){
         super.onAttach(context);
         Log.i("CreateAnnouncementFragment","Fragment's on attach");
         if (context instanceof MainActivity){
             _mainActivity = (MainActivity) context;
             _databaseManager = _mainActivity.getDatabaseManager();
-            mAuth.getCurrentUser();
+            mAuth = FirebaseAuth.getInstance();
+            _user = mAuth.getCurrentUser();
         }
     }
 
@@ -54,6 +62,12 @@ public class CreateAnnouncementFragment extends Fragment {
         latitudeEditText = rootView.findViewById(R.id.editTextLatitude);
         longitudeEditText = rootView.findViewById(R.id.editTextLongitude);
         createButton = rootView.findViewById(R.id.buttonCreate);
+        _keywordSpinner = rootView.findViewById(R.id.keywordSpinner);
+
+        List<String> categories = _mainActivity.getCategories();
+        ArrayAdapter<String> adapter = new ArrayAdapter<>(_mainActivity, androidx.appcompat.R.layout.support_simple_spinner_dropdown_item, categories);
+        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        _keywordSpinner.setAdapter(adapter);
 
         latitudeEditText.addTextChangedListener(new TextWatcher() {
             @Override
@@ -92,6 +106,43 @@ public class CreateAnnouncementFragment extends Fragment {
             }
         });
 
+        longitudeEditText.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+                // Nothing
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                //Nothing
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+                if (!s.toString().isEmpty()) {
+                    String replacement = "";
+                    try{
+                        Double value = Double.parseDouble(s.toString());
+
+                        if (value < -180){
+                            replacement = "-180";
+                        }
+                        else if (value > 180){
+                            replacement = "180";
+                        }
+                        if (!replacement.equals("")){
+                            longitudeEditText.setError("Longitude must be between -180 and 180.");
+                            longitudeEditText.setText(replacement);
+                        }
+                    }
+                    catch (NumberFormatException e){
+                        longitudeEditText.setError("Longitude must be a valid number.");
+                    }
+
+                }
+            }
+        });
+
         createButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -101,6 +152,7 @@ public class CreateAnnouncementFragment extends Fragment {
                 String endDate = endDateEditText.getText().toString();
                 String latitude = latitudeEditText.getText().toString();
                 String longitude = longitudeEditText.getText().toString();
+                String selectedCategory = _keywordSpinner.getSelectedItem().toString();
 
                 if (title.equals("")
                 || description.equals("")
@@ -124,20 +176,21 @@ public class CreateAnnouncementFragment extends Fragment {
                         else if (latitudeValue > 90.0){
                             latitudeValue = 90.0;
                         }
-                        if (longitudeValue < -90.0){
-                            longitudeValue = -90.0;
+                        if (longitudeValue < -180.0){
+                            longitudeValue = -180.0;
                         }
-                        else if (longitudeValue > 90.0){
-                            longitudeValue = 90.0;
+                        else if (longitudeValue > 180.0){
+                            longitudeValue = 180.0;
                         }
 
                         Announcement announcement = new Announcement();
                         announcement.Title = title;
                         announcement.Description = description;
-                        announcement.Category = null; //TODO
+                        announcement.Category = new ArrayList<>();
+                        announcement.Category.add(selectedCategory);
                         announcement.Photo = "";
                         announcement.Number_of_likes = 0L;
-                        announcement.UserID = mAuth.getUid();
+                        announcement.UserID = "user";//_user.getUid();
                         announcement.End = endTimestamp;
                         announcement.Coordinates = new GeoPoint(latitudeValue, longitudeValue);
 
