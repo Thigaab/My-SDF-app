@@ -43,6 +43,10 @@
             android:theme="@style/Theme.MySDFApp">
 
         </activity>
+        <activity
+            android:name=".UserOptionsActivity"
+            android:theme="@style/Theme.Material3.Dark.NoActionBar"
+            android:exported="false" />
     </application>
 
 </manifest>
