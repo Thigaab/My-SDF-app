@@ -64,4 +64,12 @@
     <string name="createAnnouncementLabel">Create Announcement</string>
     <string name="endDate_label">End Date</string>
     <string name="endDate_prompt">Insert end date here</string>
+    <string name="my_map_api_key">AIzaSyCj98VMzAl0n89nZNvTGZHdhXdOM_SzaZs</string>
+    <string name="login">Login</string>
+    <string name="email">Email</string>
+    <string name="password">Password</string>
+    <string name="register">Register</string>
+    <string name="click_to_login">Click to login</string>
+    <string name="click_to_register">Click to register</string>
+    <string name="logout">logout</string>
 </resources>
