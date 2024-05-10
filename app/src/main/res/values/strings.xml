@@ -1,19 +1,12 @@
 <resources>
     <string name="app_name">My SDF app</string>
     <string name="action_settings">Settings</string>
+    <!-- Strings used for fragments for navigation -->
+    <string name="first_fragment_label">First Fragment</string>
+    <string name="second_fragment_label">Second Fragment</string>
+    <string name="next">Next</string>
+    <string name="previous">Previous</string>
 
-
-    <string name="Title">Title</string>
-
-
-
-    <string name="login">Login</string>
-    <string name="email">Email</string>
-    <string name="password">Passeword</string>
-    <string name="register">Register</string>
-    <string name="click_to_login">Click to login</string>
-    <string name="click_to_register">Click to register</string>
-    <string name="logout">logout</string>
     <string name="lorem_ipsum">
         Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nam in scelerisque sem. Mauris
         volutpat, dolor id interdum ullamcorper, risus dolor egestas lectus, sit amet mattis purus
@@ -69,5 +62,14 @@
     <string name="enter_title">Enter Title</string>
     <string name="enter_description">Enter Description</string>
     <string name="createAnnouncementLabel">Create Announcement</string>
-
+    <string name="endDate_label">End Date</string>
+    <string name="endDate_prompt">Insert end date here</string>
+    <string name="my_map_api_key">AIzaSyCj98VMzAl0n89nZNvTGZHdhXdOM_SzaZs</string>
+    <string name="login">Login</string>
+    <string name="email">Email</string>
+    <string name="password">Password</string>
+    <string name="register">Register</string>
+    <string name="click_to_login">Click to login</string>
+    <string name="click_to_register">Click to register</string>
+    <string name="logout">logout</string>
 </resources>
