@@ -5,11 +5,6 @@ import java.util.Arrays;
 import java.util.List;
 
 public class textSanitizer {
-    public static void main(String[] args) {
-        String inputText = "This is a sample text with some bad words like damn and hell.";
-        String filteredText = filterBadWords(inputText);
-        System.out.println(filteredText);
-    }
 
     public static String filterBadWords(String text) {
         List<String> badWords = Arrays.asList(

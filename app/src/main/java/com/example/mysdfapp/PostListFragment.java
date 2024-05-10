@@ -44,6 +44,8 @@ public class PostListFragment extends Fragment {
             @Override
             public void onItemClick(View view, int position) {
                 // Expend fragment with the given post info
+                DetailedLayout newFragment = new DetailedLayout(_postAdapter.AnnouncementList.get(position));
+                _mainActivity.commitFragment(newFragment, null);
             }
         });
         _postAdapter.AnnouncementList = new ArrayList<>();
