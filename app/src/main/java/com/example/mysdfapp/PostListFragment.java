@@ -56,11 +56,13 @@ public class PostListFragment extends Fragment {
                 _mainActivity.fetchInDatabase(new DatabaseManager.ExecuteToListAfterQueryAction() {
                     @Override
                     public void applyToAnnouncements(List<Announcement> announcementList) {
-                        int startPosition = _postAdapter.getItemCount();
-                        for (Announcement announcement : announcementList){
-                            _postAdapter.AnnouncementList.add(announcement);
+                        if (announcementList.size() > 0){
+                            int startPosition = _postAdapter.getItemCount();
+                            for (Announcement announcement : announcementList){
+                                _postAdapter.AnnouncementList.add(announcement);
+                            }
+                            _postAdapter.notifyItemRangeInserted(startPosition, announcementList.size());
                         }
-                        _postAdapter.notifyItemRangeInserted(startPosition, announcementList.size());
                     }
                 });
             }

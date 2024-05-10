@@ -248,8 +248,10 @@ public class DatabaseManager {
                         Announcement newAnnouncement = createAnnouncementFromDocument(document);
                         announcementList.add(newAnnouncement);
                     }
-                    lastDocument = queryDocumentSnapshots.getDocuments()
-                            .get(queryDocumentSnapshots.getDocuments().size() - 1);
+                    if (queryDocumentSnapshots.getDocuments().size() > 0) {
+                        lastDocument = queryDocumentSnapshots.getDocuments()
+                                .get(queryDocumentSnapshots.getDocuments().size() - 1);
+                    }
 
                     action.applyToAnnouncements(announcementList);
                 })
@@ -274,8 +276,10 @@ public class DatabaseManager {
                         Announcement newAnnouncement = createAnnouncementFromDocument(document);
                         announcementList.add(newAnnouncement);
                     }
-                    lastDocument = queryDocumentSnapshots.getDocuments()
-                            .get(queryDocumentSnapshots.getDocuments().size() - 1);
+                    if (queryDocumentSnapshots.getDocuments().size() > 0) {
+                        lastDocument = queryDocumentSnapshots.getDocuments()
+                                .get(queryDocumentSnapshots.getDocuments().size() - 1);
+                    }
 
                     action.applyToAnnouncements(announcementList);
                 })
@@ -304,8 +308,10 @@ public class DatabaseManager {
                         // Add the announcement to the list
                         announcements.add(newAnnouncement);
                     }
-                    lastDocument = queryDocumentSnapshots.getDocuments()
-                            .get(queryDocumentSnapshots.getDocuments().size() - 1);
+                    if (queryDocumentSnapshots.getDocuments().size() > 0) {
+                        lastDocument = queryDocumentSnapshots.getDocuments()
+                                .get(queryDocumentSnapshots.getDocuments().size() - 1);
+                    }
 
                     // Sort the list of announcements by proximity
                     sortAnnouncementsByDistance(announcements);
