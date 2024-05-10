@@ -343,7 +343,32 @@ public class DatabaseManager {
             n--;
         } while (swapped);
     }
+    public void searchAnnouncementsByUserId(String userId, ExecuteToListAfterQueryAction action) {
+        Query query = announcementsCollection.whereEqualTo("UserID", userId)
+                .limit(LimitPerBatch);
 
+        if (lastDocument != null){
+            query.startAfter(lastDocument);
+        }
+
+        query.get()
+                .addOnSuccessListener(queryDocumentSnapshots -> {
+                    List<Announcement> announcementList = new ArrayList<>();
+                    for (QueryDocumentSnapshot document : queryDocumentSnapshots) {
+                        Announcement newAnnouncement = createAnnouncementFromDocument(document);
+                        announcementList.add(newAnnouncement);
+                    }
+                    if (queryDocumentSnapshots.getDocuments().size() > 0) {
+                        lastDocument = queryDocumentSnapshots.getDocuments()
+                                .get(queryDocumentSnapshots.getDocuments().size() - 1);
+                    }
+
+                    action.applyToAnnouncements(announcementList);
+                })
+                .addOnFailureListener(e -> {
+                    Log.e(TAG, "Couldn't get the announcements with the given user ID.");
+                });
+    }
     private double calculateDistance(GeoPoint point1, GeoPoint point2) {
         double dx = point1.getLatitude() - point2.getLatitude();
         double dy = point1.getLongitude() - point2.getLongitude();

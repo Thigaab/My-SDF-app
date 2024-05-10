@@ -136,7 +136,7 @@ public class CreateAnnouncementFragment extends Fragment {
                         announcement.Description = description;
                         announcement.Category = null; //TODO
                         announcement.Photo = "";
-                        announcement.Number_of_likes = 0L;
+                        announcement.Number_of_likes = 2L;
                         announcement.UserID = mAuth.getUid();
                         announcement.End = endTimestamp;
                         announcement.Coordinates = new GeoPoint(latitudeValue, longitudeValue);
