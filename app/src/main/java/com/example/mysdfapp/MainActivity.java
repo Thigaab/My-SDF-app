@@ -39,6 +39,9 @@ public class MainActivity extends AppCompatActivity {
 
     private List<String> _researchOptionsLabels;
     private List<String> _categories;
+    public List<String> getCategories(){
+        return _categories;
+    }
     private ActivityMainBinding _binding;
     private FragmentManager _fragmentManager;
     private DatabaseManager _databaseManager;
