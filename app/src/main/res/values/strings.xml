@@ -1,12 +1,19 @@
 <resources>
     <string name="app_name">My SDF app</string>
     <string name="action_settings">Settings</string>
-    <!-- Strings used for fragments for navigation -->
-    <string name="first_fragment_label">First Fragment</string>
-    <string name="second_fragment_label">Second Fragment</string>
-    <string name="next">Next</string>
-    <string name="previous">Previous</string>
 
+
+    <string name="Title">Title</string>
+
+
+
+    <string name="login">Login</string>
+    <string name="email">Email</string>
+    <string name="password">Passeword</string>
+    <string name="register">Register</string>
+    <string name="click_to_login">Click to login</string>
+    <string name="click_to_register">Click to register</string>
+    <string name="logout">logout</string>
     <string name="lorem_ipsum">
         Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nam in scelerisque sem. Mauris
         volutpat, dolor id interdum ullamcorper, risus dolor egestas lectus, sit amet mattis purus
@@ -46,4 +53,21 @@
     <string name="delete_label">Delete</string>
     <string name="upvote_button_contentDescription">Up vote</string>
     <string name="downvote_button_contentDescription">Down vote</string>
+    <string name="loadMore_button_contentDescription">Load more posts</string>
+    <string name="mypost_button_contentDescription">Go to my posts</string>
+    <string name="post_researchBar_label">Current sorting method: </string>
+    <string name="researchOption_popular">Most popular</string>
+    <string name="researchOption_nearest">Nearest</string>
+    <string name="researchOption_keywords">With keywords</string>
+    <string name="details_titleLabel">Title</string>
+    <string name="details_descriptionLabel">Description</string>
+    <string name="details_numberOfLikeLabel">Number of like</string>
+    <string name="newPost_titlePrompt">Insert title here</string>
+    <string name="newPost_descriptionPrompt">Insert description here</string>
+    <string name="geo_button_label">See location on the map</string>
+    <string name="Description">Description</string>
+    <string name="enter_title">Enter Title</string>
+    <string name="enter_description">Enter Description</string>
+    <string name="createAnnouncementLabel">Create Announcement</string>
+
 </resources>
